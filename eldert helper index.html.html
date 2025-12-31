@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智友伴 - 老友記助手</title>
+    <style>
+        :root {
+            --primary-yellow: #facc15;
+            --btn-hover: #eab308;
+            --bg-color: #fefce8;
+            --border-black: #000000;
+            --ai-sparkle: #8b5cf6;
+            --recording-red: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #000000;
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-yellow);
+            border-bottom: 3px solid var(--border-black);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 20;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .heart-icon {
+            color: #dc2626;
+            width: 28px;
+            height: 28px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 900;
+        }
+
+        /* 頂部資訊卡片 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 12px;
+            padding: 15px;
+            max-width: 700px;
+            margin: 0 auto;
+            width: calc(100% - 30px);
+        }
+
+        .info-card {
+            background: #ffffff;
+            border: 3px solid var(--border-black);
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 4px 4px 0px var(--border-black);
+        }
+
+        .info-card-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 4px;
+        }
+
+        .info-card-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .date-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+        }
+
+        /* 聊天區域 */
+        #chat-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 15px 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1.5;
+            border: 2px solid var(--border-black);
+            position: relative;
+        }
+
+        .bot-msg {
+            align-self: flex-start;
+            background-color: #ffffff;
+            border-radius: 20px 20px 20px 0;
+            box-shadow: 4px 4px 0 var(--border-black);
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background-color: #fef08a;
+            border-radius: 20px 20px 0 20px;
+            box-shadow: -4px 4px 0 var(--border-black);
+        }
+
+        .ai-status {
+            font-size: 0.9rem;
+            color: var(--ai-sparkle);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* 底部操作區 */
+        footer {
+            background-color: #fff;
+            border-top: 3px solid var(--border-black);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex-grow: 1;
+            padding: 15px;
+            border: 3px solid var(--border-black);
+            border-radius: 16px;
+            font-size: 1.2rem;
+            outline: none;
+        }
+
+        .voice-btn {
+            background-color: #ffffff;
+            border: 3px solid var(--border-black);
+            border-radius: 16px;
+            padding: 15px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--border-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .voice-btn.recording {
+            background-color: var(--recording-red);
+            color: white;
+            transform: scale(0.98);
+            box-shadow: 0 2px 0 var(--border-black);
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            background-color: var(--primary-yellow);
+            color: #000;
+            border: 3px solid var(--border-black);
+            padding: 16px 8px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--border-black);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--border-black);
+        }
+
+        .ai-btn {
+            background-color: #f5f3ff;
+            border-color: var(--ai-sparkle);
+            color: var(--ai-sparkle);
+        }
+
+        .send-btn {
+            background-color: var(--ai-sparkle);
+            color: white;
+            border-color: var(--border-black);
+            padding: 0 25px;
+        }
+
+        #loading {
+            text-align: center;
+            color: var(--ai-sparkle);
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-title">
+        <svg class="heart-icon" viewBox="0 0 24 24" fill="currentColor" stroke="black" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        <h1>智友伴</h1>
+    </div>
+    <div id="loading">✨ 思考中...</div>
+</header>
+
+<div class="info-grid">
+    <div class="info-card">
+        <div style="font-size: 2rem;">🕒</div>
+        <div>
+            <div class="info-card-label">現在時間</div>
+            <div id="info-time" class="info-card-value">--:--</div>
+        </div>
+    </div>
+    <div class="info-card">
+        <div style="font-size: 2rem;">📅</div>
+        <div>
+            <div id="info-date" class="date-value">--/--</div>
+            <div id="info-full-date" class="info-card-label">讀取中</div>
+        </div>
+    </div>
+</div>
+
+<div id="chat-area">
+    <!-- 訊息區域 -->
+</div>
+
+<footer>
+    <div class="input-controls">
+        <!-- 語音按鈕 - 放在顯眼位置 -->
+        <button id="voice-trigger" class="voice-btn">
+            <span id="voice-icon">🎙️</span> <span id="voice-text">撳住講嘢</span>
+        </button>
+
+        <div class="input-group">
+            <input type="text" id="user-input" placeholder="想同我講咩？">
+            <button class="send-btn" onclick="askGemini()">發送</button>
+        </div>
+        
+        <div class="button-grid">
+            <button onclick="startRealityOrientation()">📅 今日幾號</button>
+            <button onclick="checkWeather()">☀️ 今日天氣</button>
+            <button class="ai-btn" onclick="aiFestival()">✨ 節日趣聞</button>
+            <button class="ai-btn" onclick="aiChatTopic()">✨ 搵人傾計</button>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const apiKey = ""; // 自動注入
+    const synth = window.speechSynthesis;
+    const chatArea = document.getElementById('chat-area');
+    const loadingEl = document.getElementById('loading');
+    
+    // 語音識別設置
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'zh-HK';
+        recognition.interimResults = false;
+        recognition.continuous = false;
+    }
+
+    // --- 核心系統功能 ---
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('info-time').innerText = now.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false });
+        document.getElementById('info-date').innerText = `${now.getMonth() + 1}月${now.getDate()}日`;
+        const dayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+        document.getElementById('info-full-date').innerText = dayNames[now.getDay()];
+    }
+
+    function addMessage(sender, text, isAi = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}-msg`;
+        msgDiv.innerHTML = text + (isAi ? `<div class="ai-status">✨ 由 Gemini AI 提供建議</div>` : "");
+        chatArea.appendChild(msgDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        if (sender === 'bot') speak(text);
+    }
+
+    function speak(text) {
+        if (synth.speaking) synth.cancel();
+        const cleanText = text.replace(/<[^>]*>?/gm, '');
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        const voices = synth.getVoices();
+        utter.voice = voices.find(v => v.lang.includes('HK') || v.lang.includes('zh-HK')) || voices[0];
+        utter.rate = 0.9;
+        synth.speak(utter);
+    }
+
+    // --- Gemini API ---
+    async function callGemini(prompt, systemPrompt) {
+        loadingEl.style.display = 'block';
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] }
+        };
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            loadingEl.style.display = 'none';
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "聽唔清楚，可唔可以再講一次？";
+        } catch (error) {
+            loadingEl.style.display = 'none';
+            return "網絡有啲問題，遲下再試下。";
+        }
+    }
+
+    async function askGemini(textOverride = null) {
+        const input = document.getElementById('user-input');
+        const text = textOverride || input.value.trim();
+        if (!text) return;
+
+        addMessage('user', text);
+        if (!textOverride) input.value = '';
+
+        const systemPrompt = "你是一個專為香港長者設計的聊天助手『智友伴』。請使用親切、尊重的廣東話回答。語氣要像老朋友，回覆要簡短易明（50字內），多鼓勵長者。";
+        const response = await callGemini(text, systemPrompt);
+        addMessage('bot', response, true);
+    }
+
+    // --- 語音錄音邏輯 ---
+    const voiceBtn = document.getElementById('voice-trigger');
+    const voiceText = document.getElementById('voice-text');
+    const voiceIcon = document.getElementById('voice-icon');
+
+    if (recognition) {
+        // 開始錄音
+        const startRecording = (e) => {
+            e.preventDefault();
+            voiceBtn.classList.add('recording');
+            voiceText.innerText = '聽緊你講嘢...';
+            voiceIcon.innerText = '🛑';
+            recognition.start();
+        };
+
+        // 結束錄音
+        const stopRecording = (e) => {
+            e.preventDefault();
+            voiceBtn.classList.remove('recording');
+            voiceText.innerText = '撳住講嘢';
+            voiceIcon.innerText = '🎙️';
+            recognition.stop();
+        };
+
+        // 綁定事件（支援手機長按與電腦點擊）
+        voiceBtn.addEventListener('mousedown', startRecording);
+        voiceBtn.addEventListener('mouseup', stopRecording);
+        voiceBtn.addEventListener('touchstart', startRecording);
+        voiceBtn.addEventListener('touchend', stopRecording);
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            if (transcript) {
+                askGemini(transcript);
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error', event.error);
+            voiceBtn.classList.remove('recording');
+            voiceText.innerText = '撳住講嘢';
+            voiceIcon.innerText = '🎙️';
+        };
+    } else {
+        voiceBtn.style.display = 'none'; // 如果瀏覽器不支援則隱藏
+    }
+
+    // --- 其他功能 ---
+    function startRealityOrientation() {
+        addMessage('user', '今日幾號');
+        const now = new Date();
+        const reply = `老友記，今日係 ${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 號，${["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"][now.getDay()]}。`;
+        setTimeout(() => addMessage('bot', reply), 300);
+    }
+
+    async function checkWeather() {
+        addMessage('user', '今日天氣');
+        try {
+            const response = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
+            const data = await response.json();
+            const temp = data.temperature.data[0].value;
+            addMessage('bot', `而家大約係 ${temp} 度。老友記，記住飲多啲水呀。`);
+        } catch (e) {
+            addMessage('bot', '問唔到天氣，不過記得著夠衫呀。');
+        }
+    }
+
+    async function aiChatTopic() {
+        addMessage('user', '✨ 搵人傾計');
+        const response = await callGemini("請開展一個懷舊或生活化話題。", "你是一個香港長者的社交陪伴員。用廣東話發起一個關於懷舊話題的問題。");
+        addMessage('bot', response, true);
+    }
+
+    async function aiFestival() {
+        addMessage('user', '✨ 節日趣聞');
+        const response = await callGemini("講一個最近的節慶習俗。", "你是一個香港文化專家。用廣東話介紹一個最近的節日習俗給長者聽。");
+        addMessage('bot', response, true);
+    }
+
+    window.onload = () => {
+        updateClock();
+        setInterval(updateClock, 10000);
+        setTimeout(() => {
+            addMessage('bot', '老友記，你好！想同我傾計，定係想知今日幾號？你可以撳住下面個話筒同我講嘢㗎！');
+        }, 1000);
+    };
+
+    document.getElementById('user-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') askGemini();
+    });
+</script>
+
+</body>
+</html>
